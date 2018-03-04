@@ -15,17 +15,55 @@ const bcrypt = require('bcryptjs')
  * Contains multi-purpose functions for child-methods and provides default values
  */
 class Authentication extends Endpoint {
+  constructor(api, db, url) {
+    super(api, db, url)
+    this.schema.method = 'POST'
+  }
+
   async main (req, res) {
-    res.send(this.newUser(req))
+    let credentials = req.body
+    this.res = res
+
+    // Credentials sent
+    if (credentials.user_key && credentials.user_secret) {
+      let user_id = await this.newUser(credentials, req)
+      if (user_id) res.send(user_id)
+    }
+
+    // No allowed content
+    else {
+      res.status(401).send({
+        error: 'Unauthorized.',
+        reason: 'Expected user credentials. Got: ' + JSON.stringify(credentials)
+      })
+    }
   }
 
   /**
    * Generate new User into db and return credentials to use
    */
-  async newUser (req) {
+  async newUser (credentials, req) {
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
-    let user_secret = randtoken.uid(64)
-    let user_key = randtoken.uid(64)
+    let user_key = credentials.user_key
+    let user_secret = credentials.user_secret
+
+    if (!user_key.trim() || !user_secret.trim()) {
+      this.res.status(403).send({
+        error: 'Registration failed.',
+        reason: 'User key or secret is empty.'
+      })
+      return
+    }
+
+    let userExists = await this.db.collection('users').findOne({ user_key: user_key })
+    if (userExists) {
+      this.res.status(403).send({
+        error: 'Registration failed.',
+        reason: 'User key is already taken.'
+      })
+      return
+    }
+
     let user = {
       user_id: 'unidentified-' + randtoken.uid(16),
       user_key: user_key,
@@ -38,8 +76,7 @@ class Authentication extends Endpoint {
     this.db.collection('users').insertOne(user)
     await this.saveIP(user_key, ip, 'register', true)
     return ({
-      user_key: user_key,
-      user_secret: user_secret
+      user_id: user.user_id
     })
   }
 
