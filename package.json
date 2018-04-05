@@ -1,20 +1,20 @@
 {
-  "name": "blitz-js-auth",
-  "version": "1.0.8",
-  "description": "⚡ Auth Node for blitz.js framework",
+  "name": "cubic-auth",
+  "version": "1.0.0",
+  "description": "Auth Server for Cubic.",
   "main": "index.js",
   "scripts": {
     "start": "node ./index.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nexus-devs/blitz.js-auth"
+    "url": "https://github.com/nexus-devs/cubic-auth"
   },
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "blitz-js-api": "^1.0.8",
-    "blitz-js-core": "^1.0.8",
+    "cubic-api": "^1.0.0",
+    "cubic-core": "^1.0.0",
     "rand-token": "^0.4.0"
   },
   "devDependencies": {
