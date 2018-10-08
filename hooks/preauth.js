@@ -52,13 +52,15 @@ class PreAuth {
 
           // Cleanup
           this.removeMiddleware(cubic.nodes.auth.api.server.http.stack.stack, '/authenticate')
-          this.removeMiddleware(cubic.nodes.auth.api.server.sockets.stack.stack, '/authenticate')
+          this.removeMiddleware(cubic.nodes.auth.api.server.ws.stack.stack, '/authenticate')
 
           // Send back tokens
-          res.json({
+          res.send({
             access_token: access_token,
             refresh_token: refresh_token
           })
+          client.close()
+          return true
         }
         client.close()
       }
